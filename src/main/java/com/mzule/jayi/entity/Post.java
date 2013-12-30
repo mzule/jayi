@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 
 import com.mzule.jayi.context.Context;
 import com.mzule.jayi.util.HtmlUtils;
+import com.petebevin.markdown.MarkdownProcessor;
 
 public class Post implements Comparable<Post> {
 
@@ -53,7 +54,7 @@ public class Post implements Comparable<Post> {
 		File file = new File(Context.getBaseDir() + "/_templates", template);
 		log.debug("compile post with template " + file.getName());
 		String templateContent = FileUtils.readFileToString(file);
-		templateContent = templateContent.replace("{content}", content);
+		templateContent = templateContent.replace("{content}", toHtml(content));
 		// deal with includes
 		File includes = new File(Context.getBaseDir(), "_includes");
 		File[] files = includes.listFiles();
@@ -69,6 +70,21 @@ public class Post implements Comparable<Post> {
 					kv.getValue());
 		}
 		return templateContent;
+	}
+
+	/**
+	 * Convert post content to HTML. Support markdown and html syntax.
+	 * 
+	 * @param content
+	 * @return
+	 */
+	private String toHtml(String content) {
+		String fName = getFileName().toLowerCase();
+		if (fName.endsWith(".md") || fName.endsWith(".markdown")) {
+			return new MarkdownProcessor().markdown(content);
+		} else {
+			return content;
+		}
 	}
 
 	public void setFileName(String fileName) {
@@ -98,4 +114,10 @@ public class Post implements Comparable<Post> {
 	public int compareTo(Post o) {
 		return this.getTime().after(o.getTime()) ? -1 : 1;
 	}
+
+	public String getSavedFileName() {
+		String name = getFileName();
+		return name.split("\\.")[0] + ".html";
+	}
+
 }

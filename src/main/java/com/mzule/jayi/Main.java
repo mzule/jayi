@@ -25,6 +25,7 @@ public class Main {
 		String index = ir.read();
 		final String targetFolderName = "_target";
 		File target = new File(Context.getBaseDir(), targetFolderName);
+		target.delete();
 		if (!target.exists() || !target.isDirectory()) {
 			target.mkdir();
 		}
@@ -34,31 +35,32 @@ public class Main {
 		// previous and next post
 		Collections.sort(posts);
 		for (int i = 0; i < posts.size(); i++) {
-			if (i != 0) {
+			if (i == 0) {
+				posts.get(i).addKeyValue("previous_post_title", "");
+				posts.get(i).addKeyValue("previous_post_link", "");
+			} else {
 				posts.get(i).addKeyValue("previous_post_title",
 						(posts.get(i - 1).getKeyValues().get("title")));
 				posts.get(i).addKeyValue("previous_post_link",
 						(posts.get(i - 1).getFileName()));
-			} else {
-				posts.get(i).addKeyValue("previous_post_title", "");
-				posts.get(i).addKeyValue("previous_post_link", "");
 			}
-			if (i != posts.size() - 1) {
+			if (i == posts.size() - 1) {
+				posts.get(i).addKeyValue("next_post_title", "");
+				posts.get(i).addKeyValue("next_post_link", "");
+			} else {
 				posts.get(i).addKeyValue("next_post_title",
 						(posts.get(i + 1).getKeyValues().get("title")));
 				posts.get(i).addKeyValue("next_post_link",
 						(posts.get(i + 1).getFileName()));
-			} else {
-				posts.get(i).addKeyValue("next_post_title", "");
-				posts.get(i).addKeyValue("next_post_link", "");
 			}
 		}
 		// compile posts
-		File postDir = new File(target, "_post");
+		File postDir = new File(target, "posts");
 		postDir.mkdir();
 		for (Post p : posts) {
 			String content = p.compile();
-			File pFile = new File(postDir, p.getFileName());
+			// markdown files should be writen in html format.
+			File pFile = new File(postDir, p.getSavedFileName());
 			FileUtils.write(pFile, content);
 		}
 		// copy static resources, such as css, js.
@@ -68,6 +70,7 @@ public class Main {
 				String name = f.getName();
 				return name.equals("_posts") || name.equals("index.html")
 						|| name.equals("_templates")
+						|| name.equals("_includes")
 						|| name.equals(targetFolderName) ? false : true;
 			}
 		});

@@ -62,7 +62,7 @@ public class PostReader {
 		post.setContent(sb.toString());
 		post.setFileName(f.getName());
 		// build builde in key values
-		post.addKeyValue("link", "_post/" + f.getName());
+		post.addKeyValue("link", "posts/" + post.getSavedFileName());
 		post.addKeyValue("summary", post.generateSummary());
 		return post;
 	}

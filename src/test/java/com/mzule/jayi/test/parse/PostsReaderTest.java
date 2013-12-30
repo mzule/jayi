@@ -27,7 +27,6 @@ public class PostsReaderTest {
 		assertThat(posts.size(), is(2));
 		Post post = posts.get(1);
 		Map<String, String> kvs = post.getKeyValues();
-		assertThat(kvs.size(), is(3 + 1));
 		assertThat(kvs.get("title"), equalTo("this is first post"));
 		assertThat(kvs.get("time"), equalTo("2013-11-12 12:12:12"));
 		assertThat(kvs.get("template"), equalTo("post.html"));

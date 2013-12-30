@@ -31,6 +31,28 @@ public class Main {
 		File ifile = new File(target, "index.html");
 		ifile.createNewFile();
 		FileUtils.write(ifile, index);
+		// previous and next post
+		Collections.sort(posts);
+		for (int i = 0; i < posts.size(); i++) {
+			if (i != 0) {
+				posts.get(i).addKeyValue("previous_post_title",
+						(posts.get(i - 1).getKeyValues().get("title")));
+				posts.get(i).addKeyValue("previous_post_link",
+						(posts.get(i - 1).getFileName()));
+			} else {
+				posts.get(i).addKeyValue("previous_post_title", "");
+				posts.get(i).addKeyValue("previous_post_link", "");
+			}
+			if (i != posts.size() - 1) {
+				posts.get(i).addKeyValue("next_post_title",
+						(posts.get(i + 1).getKeyValues().get("title")));
+				posts.get(i).addKeyValue("next_post_link",
+						(posts.get(i + 1).getFileName()));
+			} else {
+				posts.get(i).addKeyValue("next_post_title", "");
+				posts.get(i).addKeyValue("next_post_link", "");
+			}
+		}
 		// compile posts
 		File postDir = new File(target, "_post");
 		postDir.mkdir();
@@ -39,8 +61,6 @@ public class Main {
 			File pFile = new File(postDir, p.getFileName());
 			FileUtils.write(pFile, content);
 		}
-		// previous and next post
-		Collections.sort(posts);
 		// copy static resources, such as css, js.
 		File baseDir = new File(Context.getBaseDir());
 		File[] files = baseDir.listFiles(new FileFilter() {

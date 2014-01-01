@@ -11,10 +11,10 @@ import java.util.Map.Entry;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.markdown4j.Markdown4jProcessor;
 
 import com.mzule.jayi.context.Context;
 import com.mzule.jayi.util.HtmlUtils;
-import com.petebevin.markdown.MarkdownProcessor;
 
 public class Post implements Comparable<Post> {
 
@@ -81,7 +81,15 @@ public class Post implements Comparable<Post> {
 	private String toHtml(String content) {
 		String fName = getFileName().toLowerCase();
 		if (fName.endsWith(".md") || fName.endsWith(".markdown")) {
-			return new MarkdownProcessor().markdown(content);
+			try {
+				log.debug("before process:" + content);
+				String html = new Markdown4jProcessor().process(content);
+				log.debug("after process:" + html);
+				return html;
+			} catch (IOException e) {
+				log.error("Error while process markdown document", e);
+				return content;
+			}
 		} else {
 			return content;
 		}

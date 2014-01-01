@@ -58,6 +58,7 @@ public class PostReader {
 		StringBuilder sb = new StringBuilder();
 		for (; i < lines.size(); i++) {
 			sb.append(lines.get(i));
+			sb.append('\n');
 		}
 		post.setContent(sb.toString());
 		post.setFileName(f.getName());

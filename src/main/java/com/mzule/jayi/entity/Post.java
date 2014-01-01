@@ -1,32 +1,40 @@
 package com.mzule.jayi.entity;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.markdown4j.Markdown4jProcessor;
-
-import com.mzule.jayi.context.Context;
-import com.mzule.jayi.util.HtmlUtils;
 
 public class Post implements Comparable<Post> {
 
 	private static final Logger log = Logger.getLogger(Post.class);
 
+	public static final String KEY_TITLE = "title";
+	public static final String KEY_TIME = "time";
+	public static final String KEY_TEMPLATE = "template";
+	public static final String KEY_NEXT_POST_TITLE = "next_post_title";
+	public static final String KEY_NEXT_POST_LINK = "next_post_link";
+	public static final String KEY_PREVIOUS_POST_TITLE = "previous_post_title";
+	public static final String KEY_PREVIOUS_POST_LINK = "previous_post_link";
+	public static final String KEY_SUMMARY = "summary";
+	public static final String KEY_LINK = "link";
+	public static final String KEY_STICK = "stick";
+	public static final String KEY_REGULAR_POST = "regular";
+
+	private RawPost raw;
+
 	private Map<String, String> keyValues = new HashMap<String, String>();
 	private String content;
 	private Date time;
-	private String fileName;
+	private String htmlFileName;
 
-	public Map<String, String> getKeyValues() {
-		return keyValues;
+	private String baseDir;
+
+	public String getValue(String key) {
+		return keyValues.get(key);
 	}
 
 	public void addKeyValue(String key, String value) {
@@ -49,83 +57,55 @@ public class Post implements Comparable<Post> {
 		return content;
 	}
 
-	public String compile() throws IOException {
-		String template = keyValues.get("template");
-		File file = new File(Context.getBaseDir() + "/_templates", template);
-		log.debug("compile post with template " + file.getName());
-		String templateContent = FileUtils.readFileToString(file);
-		templateContent = templateContent.replace("{content}", toHtml(content));
-		// deal with includes
-		File includes = new File(Context.getBaseDir(), "_includes");
-		File[] files = includes.listFiles();
-		if (files != null) {
-			for (File f : files) {
-				templateContent = templateContent.replace("{" + f.getName()
-						+ "}", FileUtils.readFileToString(f));
-			}
-		}
-		// deal with key values
-		for (Entry<String, String> kv : keyValues.entrySet()) {
-			templateContent = templateContent.replace("{" + kv.getKey() + "}",
-					kv.getValue());
-		}
-		return templateContent;
+	public void setHtmlFileName(String fileName) {
+		this.htmlFileName = fileName;
 	}
 
-	/**
-	 * Convert post content to HTML. Support markdown and html syntax.
-	 * 
-	 * @param content
-	 * @return
-	 */
-	private String toHtml(String content) {
-		String fName = getFileName().toLowerCase();
-		if (fName.endsWith(".md") || fName.endsWith(".markdown")) {
-			try {
-				log.debug("before process:" + content);
-				String html = new Markdown4jProcessor().process(content);
-				log.debug("after process:" + html);
-				return html;
-			} catch (IOException e) {
-				log.error("Error while process markdown document", e);
-				return content;
-			}
-		} else {
-			return content;
-		}
-	}
-
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
-
-	public String getFileName() {
-		return fileName;
+	public String getHtmlFileName() {
+		return htmlFileName;
 	}
 
 	public Date getTime() {
 		if (time == null) {
-			log.error("Missing time in post " + fileName);
+			log.error("Missing time in post " + raw.getFileName());
 		}
 		return time;
-	}
-
-	public String generateSummary() {
-		String plain = HtmlUtils.removeHtmlTags(getContent());
-		int minLen = 300;
-		if (plain == null || plain.length() < minLen) {
-			return plain;
-		}
-		return plain.substring(0, minLen);
 	}
 
 	public int compareTo(Post o) {
 		return this.getTime().after(o.getTime()) ? -1 : 1;
 	}
 
-	public String getSavedFileName() {
-		String name = getFileName();
-		return name.split("\\.")[0] + ".html";
+	public Map<String, String> getKeyValues() {
+		return keyValues;
+	}
+
+	public RawPost getRaw() {
+		return raw;
+	}
+
+	public void setRaw(RawPost raw) {
+		this.raw = raw;
+	}
+
+	public void setSummary(String summary) {
+		addKeyValue(Post.KEY_SUMMARY, summary);
+	}
+
+	public String getTemplate() {
+		return getValue(KEY_TEMPLATE);
+	}
+
+	public void setBaseDir(String baseDir) {
+		this.baseDir = baseDir;
+	}
+
+	public String getBaseDir() {
+		return this.baseDir;
+	}
+
+	public boolean isRegular() {
+		return keyValues.get(KEY_REGULAR_POST).trim().equalsIgnoreCase("true");
 	}
 
 }

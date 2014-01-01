@@ -7,20 +7,18 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mzule.jayi.context.Context;
 import com.mzule.jayi.entity.Post;
-import com.mzule.jayi.reader.IndexReader;
+import com.mzule.jayi.process.index.IndexCompiler;
 
 public class IndexParserTest {
 
 	@Before
 	public void setup() {
-		Context.setBaseDir(Config.BASE_DIR);
 	}
 
 	@Test
 	public void testParseIndex() throws IOException {
-		String index = new IndexReader(getPosts()).read();
+		String index = new IndexCompiler(getPosts()).compile();
 		System.out.println(index);
 	}
 
